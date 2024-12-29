@@ -9,7 +9,7 @@ import {
   Pressable,
   Alert,
 } from "react-native";
-import React, { useState,useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { MaterialIcons } from "@expo/vector-icons";
 import { value } from "../../global_var/Globe";
 import { AntDesign } from "@expo/vector-icons";
@@ -22,24 +22,25 @@ import { productupdate } from "../../helper/productUpdate";
 const LoginScreen = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const{userId,setUserId}=useContext(UserType);
+  const { userId, setUserId } = useContext(UserType);
   const navigation = useNavigation();
-  const{productdata,setproductdata}=useContext(productupdate);
+  const { productdata, setproductdata } = useContext(productupdate);
   useEffect(() => {
     const checkLoginStatus = async () => {
       try {
         const token = await AsyncStorage.getItem("authToken");
-        const userid =  await AsyncStorage.getItem("USERID");
-          console.log(userid);
-          setUserId(userid);
-          await axios.get(value.base+"/product/view").then((res)=>{
- 
-            setproductdata(res.data)
-           console.log("hello")
-         
- }).catch( (err)=>{
-   console.log(err)
- });
+        const userid = await AsyncStorage.getItem("USERID");
+        console.log(userid);
+        setUserId(userid);
+        await axios
+          .get(value.base + "/product/view")
+          .then((res) => {
+            setproductdata(res.data);
+            console.log("hello");
+          })
+          .catch((err) => {
+            console.log(err);
+          });
         if (token) {
           navigation.replace("login");
         }
@@ -49,15 +50,14 @@ const LoginScreen = () => {
     };
     checkLoginStatus();
   }, []);
-  const handleLogin =   async ()=>{
+  const handleLogin = async () => {
     const user = {
       email: email,
       password: password,
     };
-   
 
     axios
-      .post(value.base+"/login", user)
+      .post(value.base + "/login", user)
       .then((response) => {
         console.log(response);
         const token = response.data.token;
@@ -70,23 +70,25 @@ const LoginScreen = () => {
         Alert.alert("Login Error", "Invalid Email");
         console.log(error);
       });
-    
-      
 
-        await axios.get(value.base+"/product/view").then((res)=>{
- 
-              setproductdata(res.data)
-             console.log("hello")
-           
-   }).catch( (err)=>{
-     console.log(err)
-   });
- 
-   
+    await axios
+      .get(value.base + "/product/view")
+      .then((res) => {
+        setproductdata(res.data);
+        console.log("hello");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: "white", alignItems: "center",marginTop:50 }}
+      style={{
+        flex: 1,
+        backgroundColor: "white",
+        alignItems: "center",
+        marginTop: 50,
+      }}
     >
       <View>
         <Image

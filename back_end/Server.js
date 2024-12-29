@@ -4,7 +4,6 @@ const mongoose = require("mongoose");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
 
-
 const upload = require("./uploadMiddlewire");
 const TeachableMachine = require("@sashido/teachablemachine-node");
 
@@ -16,11 +15,15 @@ const port = 8000;
 const cors = require("cors");
 app.use(cors());
 
-
-
-app.use(bodyParser.json({limit: '50mb', extended: true}));
-app.use(bodyParser.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
-app.use(bodyParser.text({ limit: '200mb' }));
+app.use(bodyParser.json({ limit: "50mb", extended: true }));
+app.use(
+  bodyParser.urlencoded({
+    limit: "50mb",
+    extended: true,
+    parameterLimit: 50000,
+  })
+);
+app.use(bodyParser.text({ limit: "200mb" }));
 
 const jwt = require("jsonwebtoken");
 app.listen(port, () => {
@@ -28,10 +31,13 @@ app.listen(port, () => {
 });
 
 mongoose
-  .connect("your  mango link", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    "mongodb://admin:12345@ac-kk1zbhg-shard-00-00.rjo2ud5.mongodb.net:27017,ac-kk1zbhg-shard-00-01.rjo2ud5.mongodb.net:27017,ac-kk1zbhg-shard-00-02.rjo2ud5.mongodb.net:27017/?ssl=true&replicaSet=atlas-1vrlrq-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Fisherman",
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => {
     console.log("Connected to MongoDB");
   })
@@ -69,16 +75,12 @@ const sendVerificationEmail = async (email, verificationToken) => {
 // Register a new user
 // ... existing imports and setup ...
 
-
-
-
-
-app.post("/image", async (req, res)=> {
- console.log("hello") 
- if (!req.params) {
+app.post("/image", async (req, res) => {
+  console.log("hello");
+  if (!req.params) {
     res.status(401).json({ error: "Please provide an image" });
   }
-  
+
   const imagDataUrl = `data:image/jpg;base64,` + req.body.buffer;
 
   console.log("Got the file");
@@ -181,8 +183,8 @@ app.post("/login", async (req, res) => {
 
     //generate a token
     const token = jwt.sign({ userId: user._id }, secretKey);
-    const userid=user._id
-    res.status(200).json({ token,userid });
+    const userid = user._id;
+    res.status(200).json({ token, userid });
   } catch (error) {
     res.status(500).json({ message: "Login Failed" });
   }
@@ -282,52 +284,46 @@ app.get("/profile/:userId", async (req, res) => {
   }
 });
 
-app.get("/orders/:userId",async(req,res) => {
-  try{
+app.get("/orders/:userId", async (req, res) => {
+  try {
     const userId = req.params.userId;
 
-    const orders = await Order.find({user:userId}).populate("user");
+    const orders = await Order.find({ user: userId }).populate("user");
 
-    if(!orders || orders.length === 0){
-      return res.status(404).json({message:"No orders found for this user"})
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({ message: "No orders found for this user" });
     }
 
     res.status(200).json({ orders });
-  } catch(error){
-    res.status(500).json({ message: "Error"});
+  } catch (error) {
+    res.status(500).json({ message: "Error" });
   }
-})
-app.post("/product/add",async(req,res)=>{
+});
+app.post("/product/add", async (req, res) => {
+  try {
+    const { name, description, price, image } = req.body;
 
-    try {
-        const { name,description,price,image } = req.body;
-
-   
-        const existingproduct = await Product.findOne({ name });
-        if (existingproduct) {
-          console.log("fish already registered:", name); // Debugging statement
-          return res.json({ message: "fish already registered" });
-        }
-    
-       
-     
-        const newproduct = await Product.create(req.body);
-        await newproduct.save();
-        const user = await Product.find();
-        res.json(user);
-      } catch (error) {
-        console.log(error);
-        res.status(500).json({ message: error });
-      }
-}
-)
-app.get("/product/view",async (req, res) => {
-    try {
-      const product = await Product.find();
-      res.json(product);
-    } catch (error) {
-      console.log(error);
-      res.json({ message: error });
+    const existingproduct = await Product.findOne({ name });
+    if (existingproduct) {
+      console.log("fish already registered:", name); // Debugging statement
+      return res.json({ message: "fish already registered" });
     }
+
+    const newproduct = await Product.create(req.body);
+    await newproduct.save();
+    const user = await Product.find();
+    res.json(user);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error });
   }
-)
+});
+app.get("/product/view", async (req, res) => {
+  try {
+    const product = await Product.find();
+    res.json(product);
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error });
+  }
+});
